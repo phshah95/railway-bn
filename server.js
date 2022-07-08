@@ -1,38 +1,47 @@
-// server.js
-console.log("hello")
-export default {
-  port: Number(process.env.PORT ?? 3000),
-  fetch(request) {
-    console.log(request)
-    return new Response(
-      `
-      <html>
-        <main>
-          <img src="https://bun.sh/logo@2x.png" style="height: 48px;" alt="bun logo" />
-          <h1>Parshwa's Crappy Benchmark (Bun On Railway)</h1>
-          <h4>Rendered at: ${new Date().toISOString()}</h4>
+// Start a fast HTTP server from a function
+Bun.serve({
+  async fetch(req) {
+    const { pathname } = new URL(req.url);
+    if (
+      !(pathname.startsWith("/https://") || pathname.startsWith("/http://"))
+    ) {
+      return new Response(
+        "Enter a path that starts with https:// or http://\n",
+        {
+          status: 400,
+        }
+      );
+    }
 
-
-          <h2><span>Full request to render time (according to Parshwa): <span id="overrideme" />ms</span></h2>
-          <script>
-            const currentTime = new Date();
-            // round trip time
-            const fullTime = currentTime - window.performance.timing.requestStart;
-            document.getElementById('overrideme').innerHTML = fullTime.toString();
-            console.log('Parshwa REPORTS', fullTime);
-    
-            const times = JSON.parse(localStorage.getItem('astro-edge-times-store')) ?? [];
-            times.push(fullTime);
-            localStorage.setItem('astro-edge-times-store', JSON.stringify(times));
-            console.table(times);
-          </script>
-        </main>
-      </html>`,
-      {
-        headers: {
-          "Content-Type": "text/html",
-        },
-      }
+    const response = await fetch(
+      req.url.substring("http://localhost:3000/".length),
+      req.clone()
     );
+
+    return new HTMLRewriter()
+      .on("a[href]", {
+        element(element: Element) {
+          element.setAttribute(
+            "href",
+            "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+          );
+        },
+      })
+      .transform(response);
   },
-};
+
+  // this is called when fetch() throws or rejects
+  //   error(err: Error) {
+  //   },
+
+  // this boolean enables the bun's default error handler
+  // sometime after the initial release, it will auto reload as well
+  development: process.env.NODE_ENV !== "production",
+  // note: this isn't node, but for compatibility bun supports process.env + more stuff in process
+
+  // SSL is enabled if these two are set
+  // certFile: './cert.pem',
+  // keyFile: './key.pem',
+
+  port: 3000, // number or string
+});
