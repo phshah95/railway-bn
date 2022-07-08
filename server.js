@@ -1,41 +1,16 @@
-// Start a fast HTTP server from a function
 Bun.serve({
-  async fetch(req) {
-    const { pathname } = new URL(req.url);
-    if (
-      !(pathname.startsWith("/https://") || pathname.startsWith("/http://"))
-    ) {
-      return new Response(
-        "Enter a path that starts with https:// or http://\n",
-        {
-          status: 400,
-        }
-      );
-    }
-
-    const response = await fetch(
-      req.url.substring("http://localhost:3000/".length),
-      req.clone()
-    );
-
-    return new HTMLRewriter()
-      .on("a[href]", {
-        element(element) {
-          element.setAttribute(
-            "href",
-            "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-          );
-        },
-      })
-      .transform(response);
+  fetch(req) {
+    return new Response(`Echo: ${req.url}`);
   },
 
-  // this is called when fetch() throws or rejects
-  //   error(err: Error) {
-  //   },
+  // baseURI: "http://localhost:3000",
 
-  // this boolean enables the bun's default error handler
-  // sometime after the initial release, it will auto reload as well
+  // this is called when fetch() throws or rejects
+  // error(err: Error) {
+  //   return new Response("uh oh! :(\n" + err.toString(), { status: 500 });
+  // },
+
+  // this boolean enables bun's default error handler
   development: process.env.NODE_ENV !== "production",
   // note: this isn't node, but for compatibility bun supports process.env + more stuff in process
 
@@ -45,3 +20,14 @@ Bun.serve({
 
   port: 3000, // number or string
 });
+// Start a fast HTTP server from the main file's export
+// export default {
+//   fetch(req) {
+//     return new Response(
+//       `This is another way to start a server!
+//        if the main file export default's an object
+//        with 'fetch'. Bun automatically calls Bun.serve`
+//     );
+//   },
+//   // so autocomplete & type checking works
+// } as Bun.Serve;
