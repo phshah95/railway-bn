@@ -2,6 +2,7 @@
 export default {
   port: Number(process.env.PORT ?? 3000),
   fetch(request) {
+    console.log(request)
     return new Response(
       `
       <html>
