@@ -20,7 +20,7 @@ Bun.serve({
 
     return new HTMLRewriter()
       .on("a[href]", {
-        element(element: Element) {
+        element(element) {
           element.setAttribute(
             "href",
             "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
