@@ -1,5 +1,5 @@
 // server.js
-console.log(request)
+console.log("hello")
 export default {
   port: Number(process.env.PORT ?? 3000),
   fetch(request) {
